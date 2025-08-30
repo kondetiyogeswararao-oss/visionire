@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Registration Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #333;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+    }
+    header img {
+      max-height: 60px;
+      display: block;
+      margin: 0 auto;
+    }
+    nav {
+      display: none;
+      background: #444;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    h2 { text-align: center; }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #555; }
+    #teams-list {
+      margin-top: 20px;
+    }
+    .team {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .logout {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="visionire-banner.jpg" alt="Visionire Logo">
+    <span class="logout" onclick="logout()">Logout</span>
+  </header>
+
+  <nav id="navbar">
+    <a onclick="showSection('about')">About</a>
+    <a onclick="showSection('create')">Team Creation</a>
+    <a onclick="showSection('existing')">Existing Teams</a>
+  </nav>
+
+  <div class="container" id="login-container">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="container" id="about" style="display:none">
+    <h2>About</h2>
+    <p>This portal allows users to create and manage teams. Each team must have 1 leader and 4 members (5 total). Admin can view and delete teams.</p>
+  </div>
+
+  <div class="container" id="create" style="display:none">
+    <h2>Create Team</h2>
+    <input type="text" id="leader" placeholder="Team Leader Roll No">
+    <input type="text" id="m1" placeholder="Member 1 Roll No">
+    <input type="text" id="m2" placeholder="Member 2 Roll No">
+    <input type="text" id="m3" placeholder="Member 3 Roll No">
+    <input type="text" id="m4" placeholder="Member 4 Roll No">
+    <button onclick="saveTeam()">Save Team</button>
+  </div>
+
+  <div class="container" id="existing" style="display:none">
+    <h2>Existing Teams</h2>
+    <div id="teams-list"></div>
+  </div>
+
+  <script>
+    let users = {
+      admin: {password: "visionire", role: "admin"},
+      user1: {password: "visionire", role: "user"},
+      user2: {password: "visionire", role: "user"},
+      user3: {password: "visionire", role: "user"},
+      user4: {password: "visionire", role: "user"},
+      user5: {password: "visionire", role: "user"}
+    };
+    let currentUser = null;
+    let teams = [];
+
+    function login() {
+      let uname = document.getElementById("username").value;
+      let pass = document.getElementById("password").value;
+      if(users[uname] && users[uname].password === pass){
+        currentUser = uname;
+        alert("Login successful!");
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("navbar").style.display = "block";
+        document.querySelector(".logout").style.display = "block";
+        showSection('about');
+      } else {
+        alert("Invalid login");
+      }
+    }
+
+    function logout(){
+      currentUser = null;
+      alert("Logged out successfully!");
+      document.getElementById("navbar").style.display = "none";
+      document.querySelector(".logout").style.display = "none";
+      document.getElementById("about").style.display = "none";
+      document.getElementById("create").style.display = "none";
+      document.getElementById("existing").style.display = "none";
+      document.getElementById("login-container").style.display = "block";
+    }
+
+    function showSection(section){
+      document.getElementById("about").style.display = "none";
+      document.getElementById("create").style.display = "none";
+      document.getElementById("existing").style.display = "none";
+      document.getElementById(section).style.display = "block";
+    }
+
+    function saveTeam(){
+      if(!currentUser){
+        alert("Please login first");
+        return;
+      }
+      let leader = document.getElementById("leader").value;
+      let m1 = document.getElementById("m1").value;
+      let m2 = document.getElementById("m2").value;
+      let m3 = document.getElementById("m3").value;
+      let m4 = document.getElementById("m4").value;
+      if(!leader || !m1 || !m2 || !m3 || !m4){
+        alert("Fill all details");
+        return;
+      }
+      teams.push({leader, members:[m1,m2,m3,m4], createdBy: currentUser, time: new Date().toLocaleString()});
+      alert("Team saved successfully!");
+      clearTeamForm();
+      showTeams();
+      showSection('existing');
+    }
+
+    function clearTeamForm(){
+      document.getElementById("leader").value = "";
+      document.getElementById("m1").value = "";
+      document.getElementById("m2").value = "";
+      document.getElementById("m3").value = "";
+      document.getElementById("m4").value = "";
+    }
+
+    function showTeams(){
+      let list = document.getElementById("teams-list");
+      list.innerHTML = "";
+      teams.forEach((t, i) => {
+        list.innerHTML += `<div class='team'><b>Team ${i+1}</b><br>Leader: ${t.leader}<br>Members: ${t.members.join(", ")}<br>Created By: ${t.createdBy}<br>Time: ${t.time}${currentUser=="admin"?` <button onclick='deleteTeam(${i})'>Delete</button>`:""}</div>`;
+      });
+    }
+
+    function deleteTeam(i){
+      teams.splice(i,1);
+      showTeams();
+    }
+  </script>
+</body>
+</html>
